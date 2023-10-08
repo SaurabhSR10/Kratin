@@ -1,13 +1,91 @@
 # Kratin
-How can you help Sunita Sharma (65+ years old) to live a healthier and better life?
+import React, { useState, useEffect } from "react";
 
-I provided is a simple example of a medication reminder app. It is just a starting point, and you can extend it to add additional features and functionality.
+const MedicationReminder = () => {
+  const [medications, setMedications] = useState([]);
+  const [reminders, setReminders] = useState([]);
+  const [adherenceData, setAdherenceData] = useState([]);
 
-For example, you could add the following features:
+  useEffect(() => {
+    // Fetch medications from the backend server
+    fetch("/medications")
+      .then((response) => response.json())
+      .then((data) => setMedications(data));
+  }, []);
 
-The ability to set reminders for medications
-The ability to track when medications have been taken
-The ability to integrate with GPS tracking to send alerts if a medication dose is missed
-The ability to sync with a user's calendar to avoid scheduling medication reminders during busy times
-The ability to provide educational resources on medications and healthy living tips
-The ability to integrate with other healthcare providers, such as a user's doctor and pharmacist
+  const addMedication = (medication) => {
+    setMedications([...medications, medication]);
+  };
+
+  const removeMedication = (medication) => {
+    const updatedMedications = medications.filter(
+      (m) => m.id !== medication.id
+    );
+    setMedications(updatedMedications);
+  };
+
+  const addReminder = (medication, time) => {
+    setReminders([...reminders, { medication, time }]);
+  };
+
+  const removeReminder = (reminder) => {
+    const updatedReminders = reminders.filter(
+      (r) => r.medication.id !== reminder.medication.id && r.time !== reminder.time
+    );
+    setReminders(updatedReminders);
+  };
+
+  const trackAdherence = (medication) => {
+    const updatedAdherenceData = adherenceData.map((m) => {
+      if (m.medication.id === medication.id) {
+        m.taken = true;
+      }
+      return m;
+    });
+    setAdherenceData(updatedAdherenceData);
+  };
+
+  const sendAlert = (medication) => {
+    // TODO: Send an alert to the user's family or caregivers
+  };
+
+  return (
+    <div>
+      <h1>Medication Reminder</h1>
+      <ul>
+        {medications.map((medication) => (
+          <li key={medication.id}>
+            {medication.name} - {medication.dosage}
+            {medication.name === "DOLO" || medication.name === "OXYMED" 
+              <div>This is an elder user, please prioritize their medication reminders.</div>
+            : null}
+            <button onClick={() => addReminder(medication, "10:00 AM")}>
+              Add 10:00 AM Reminder
+            </button>
+            <button onClick={() => addReminder(medication, "6:00 PM")}>
+              Add 6:00 PM Reminder
+            </button>
+            {reminders.filter((r) => r.medication.id === medication.id).map(
+              (reminder) => (
+                <div key={reminder.id}>
+                  {reminder.time}
+                  <button onClick={() => removeReminder(reminder)}>
+                    Remove
+                  </button>
+                </div>
+              )
+            )}
+            <button onClick={() => trackAdherence(medication)}>
+              Taken
+            </button>
+          </li>
+        ))}
+      </ul>
+      <button onClick={addMedication}>Add Medication</button>
+      <button onClick={removeMedication}>Remove Medication</button>
+    </div>
+  );
+};
+
+export default MedicationReminder;
+
